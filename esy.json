@@ -1,0 +1,11 @@
+{
+  "dependencies": { "ocaml": "4.6.x" },
+  "devDependencies": {
+    "@opam/merlin-lsp": "ocaml/merlin:merlin-lsp.opam#bd94d34",
+    "@opam/reason": "*"
+  },
+  "resolutions": {
+    "@opam/reason": "facebook/reason:reason.opam#281e433",
+    "@opam/dune": "1.11.0"
+  }
+}
