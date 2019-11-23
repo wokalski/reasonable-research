@@ -823,3 +823,19 @@ a {
 .w-6 {
   width: 1.5rem;
 }
+
+@media (min-width: 640px) {
+
+  .sm\:mx-4 {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+}
+
+@media (min-width: 768px) {
+
+  .md\:mx-6 {
+    margin-left: 1.5rem;
+    margin-right: 1.5rem;
+  }
+}
