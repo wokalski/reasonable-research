@@ -3,7 +3,7 @@ module Logo = {
   let make = () =>
     <div>
       <span className="font-mono text-lg text-gray-800 text-center">
-        {React.string("Reasonable Doctor")}
+        {React.string("Reasonable Research")}
       </span>
       <a
         className="bg-white hover:text-red-800 text-red-600 font-normal underline text-md ml-4"
