@@ -649,6 +649,10 @@ a {
   background-color: #fff;
 }
 
+.bg-gray-100 {
+  background-color: #f7fafc;
+}
+
 .bg-red-700 {
   background-color: #c53030;
 }
@@ -677,9 +681,17 @@ a {
   cursor: pointer;
 }
 
+.inline {
+  display: inline;
+}
+
 .flex {
   display: -webkit-box;
   display: flex;
+}
+
+.table {
+  display: table;
 }
 
 .hidden {
@@ -720,6 +732,10 @@ a {
   font-weight: 500;
 }
 
+.font-semibold {
+  font-weight: 600;
+}
+
 .h-64 {
   height: 16rem;
 }
@@ -734,6 +750,10 @@ a {
   margin-right: auto;
 }
 
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
 .mt-4 {
   margin-top: 1rem;
 }
@@ -742,12 +762,20 @@ a {
   margin-left: 1rem;
 }
 
+.mt-5 {
+  margin-top: 1.25rem;
+}
+
 .mt-6 {
   margin-top: 1.5rem;
 }
 
 .mt-10 {
   margin-top: 2.5rem;
+}
+
+.max-w-md {
+  max-width: 28rem;
 }
 
 .p-3 {
@@ -788,6 +816,10 @@ a {
   color: #fc8181;
 }
 
+.text-red-600 {
+  color: #e53e3e;
+}
+
 .text-red-800 {
   color: #9b2c2c;
 }
@@ -802,6 +834,10 @@ a {
 
 .hover\:text-red-600:hover {
   color: #e53e3e;
+}
+
+.hover\:text-red-800:hover {
+  color: #9b2c2c;
 }
 
 .hover\:text-blue-600:hover {
@@ -837,5 +873,21 @@ a {
   .md\:mx-6 {
     margin-left: 1.5rem;
     margin-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+
+  .lg\:mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+
+  .xl\:mx-auto {
+    margin-left: auto;
+    margin-right: auto;
   }
 }
