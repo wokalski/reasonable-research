@@ -1,9 +1,16 @@
 module Logo = {
   [@react.component]
   let make = () =>
-    <span className="font-mono text-lg text-gray-800 text-center">
-      {React.string("Reasonable Doctor")}
-    </span>;
+    <div>
+      <span className="font-mono text-lg text-gray-800 text-center">
+        {React.string("Reasonable Doctor")}
+      </span>
+      <a
+        className="bg-white hover:text-red-800 text-red-600 font-normal underline text-md ml-4"
+        href="/how-to.html">
+        {React.string("How to")}
+      </a>
+    </div>;
 };
 
 ReactDOMRe.renderToElementWithId(

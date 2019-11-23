@@ -5,9 +5,12 @@ var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
 var App$ReasonReactExamples = require("./App.bs.js");
 
 function Index$Logo(Props) {
-  return React.createElement("span", {
-              className: "font-mono text-lg text-gray-800 text-center"
-            }, "Reasonable Doctor");
+  return React.createElement("div", undefined, React.createElement("span", {
+                  className: "font-mono text-lg text-gray-800 text-center"
+                }, "Reasonable Doctor"), React.createElement("a", {
+                  className: "bg-white hover:text-red-800 text-red-600 font-normal underline text-md ml-4",
+                  href: "/how-to.html"
+                }, "How to"));
 }
 
 var Logo = {
