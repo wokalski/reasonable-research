@@ -7,6 +7,9 @@ module Logo = {
 };
 
 ReactDOMRe.renderToElementWithId(
-  <div className="container mt-10 mx-auto"> <Logo /> <App /> </div>,
+  <div className="container mt-10 mx-auto sm:mx-4 md:mx-6">
+    <Logo />
+    <App />
+  </div>,
   "index",
 );

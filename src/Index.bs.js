@@ -15,7 +15,7 @@ var Logo = {
 };
 
 ReactDOMRe.renderToElementWithId(React.createElement("div", {
-          className: "container mt-10 mx-auto"
+          className: "container mt-10 mx-auto sm:mx-4 md:mx-6"
         }, React.createElement(Index$Logo, { }), React.createElement(App$ReasonReactExamples.make, { })), "index");
 
 exports.Logo = Logo;
