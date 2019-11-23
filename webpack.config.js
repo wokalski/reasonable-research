@@ -10,5 +10,5 @@ module.exports = {
   output: {
     path: path.join(__dirname, "bundleOutput"),
     filename: 'index.js',
-  },
+  }
 };

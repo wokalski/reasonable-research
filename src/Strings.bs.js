@@ -19,6 +19,30 @@ var couldntLoadConfig = "Niepoprawny format konfiguracji lub ona nie istnieje";
 
 var couldntLoadDatabase = "Niepoprawny format bazy danych lub ona nie istnieje";
 
+var cantParseCSVFile = "Niepoprawny format pliku";
+
+var resultTitle = "Result 💉";
+
+var download = "Pobierz wynik";
+
+var goBack = "Wróć";
+
+var yes = "Tak";
+
+var no = "Nie";
+
+var next = "Dalej";
+
+var changeFile = "Zmień plik";
+
+var selectFile = "Wybierz plik";
+
+var selectedFile = "Wybrano:";
+
+var saveProgress = "Zapisz";
+
+var loadSaved = "Przywróć zapisaną sesję";
+
 exports.$$Error = $$Error;
 exports.importConfig = importConfig;
 exports.importDatabase = importDatabase;
@@ -27,4 +51,16 @@ exports.invalidConfigFormat = invalidConfigFormat;
 exports.noMatches = noMatches;
 exports.couldntLoadConfig = couldntLoadConfig;
 exports.couldntLoadDatabase = couldntLoadDatabase;
+exports.cantParseCSVFile = cantParseCSVFile;
+exports.resultTitle = resultTitle;
+exports.download = download;
+exports.goBack = goBack;
+exports.yes = yes;
+exports.no = no;
+exports.next = next;
+exports.changeFile = changeFile;
+exports.selectFile = selectFile;
+exports.selectedFile = selectedFile;
+exports.saveProgress = saveProgress;
+exports.loadSaved = loadSaved;
 /* No side effect */

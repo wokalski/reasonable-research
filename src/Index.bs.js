@@ -4,15 +4,19 @@ var React = require("react");
 var ReactDOMRe = require("reason-react/src/ReactDOMRe.js");
 var App$ReasonReactExamples = require("./App.bs.js");
 
-function Index$Header(Props) {
-  return React.createElement("header", undefined, React.createElement("h4", undefined, "Reasonable Doctor"));
+function Index$Logo(Props) {
+  return React.createElement("span", {
+              className: "font-mono text-lg text-gray-800 text-center"
+            }, "Reasonable Doctor");
 }
 
-var Header = {
-  make: Index$Header
+var Logo = {
+  make: Index$Logo
 };
 
-ReactDOMRe.renderToElementWithId(React.createElement("div", undefined, React.createElement(Index$Header, { }), React.createElement(App$ReasonReactExamples.make, { })), "index");
+ReactDOMRe.renderToElementWithId(React.createElement("div", {
+          className: "container mt-10 mx-auto"
+        }, React.createElement(Index$Logo, { }), React.createElement(App$ReasonReactExamples.make, { })), "index");
 
-exports.Header = Header;
+exports.Logo = Logo;
 /*  Not a pure module */

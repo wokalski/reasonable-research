@@ -27,26 +27,27 @@ let currentConfig =
   | ImportingConfig(c) => c
   | ImportingDatabase(c, _) => Some(c);
 
-let importConfigOpacity =
-  fun
-  | ImportingConfig(_) => 1.
-  | ImportingDatabase(_) => 0.4;
-
 [@react.component]
-let make = (~submit) => {
+let make = (~loadSaved, ~submit) => {
   let (state, dispatch) = React.useReducer(reducer, ImportingConfig(None));
-  <React.Fragment>
+  <div>
     <FileImport
       title=Strings.importConfig
       currentImport={currentConfig(state)}
-      opacity={importConfigOpacity(state)}
       onImportedFile={file => dispatch(ImportedConfig(file))}
     />
+    {switch (loadSaved, currentConfig(state)) {
+     | (Some(load), None) =>
+       <button
+         className={RedButton.className ++ " mt-4"} onClick={_ => load()}>
+         {React.string(Strings.loadSaved)}
+       </button>
+     | _ => React.null
+     }}
     {switch (state) {
      | ImportingDatabase(config, currentDatabase) =>
        <React.Fragment>
          <FileImport
-           opacity=1.
            title=Strings.importDatabase
            currentImport=currentDatabase
            onImportedFile={file => dispatch(ImportedDatabase(file))}
@@ -54,12 +55,15 @@ let make = (~submit) => {
          {Belt.Result.(
             switch (config, currentDatabase) {
             | (Ok(config), Some(Ok(database))) =>
-              <button onClick={_ => submit(~config, ~database)} />
+              <LinkButton
+                onClick={_ => submit(~config, ~database)}
+                title=Strings.next
+              />
             | _ => React.null
             }
           )}
        </React.Fragment>
      | _ => React.null
      }}
-  </React.Fragment>;
+  </div>;
 };

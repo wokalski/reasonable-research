@@ -1,31 +1,94 @@
 type importResult = Belt.Result.t(File.t, string);
 
+[@bs.val] external alert: string => unit = "alert";
+
 type state =
-  | Importing
-  | Researching(Researching.state)
-  | Result(Researching.state, ResearchResult.t);
+  | Importing(option(ResearchProgress.search))
+  | Researching(ResearchProgress.search)
+  | Result(ResearchResult.t);
 
 type action =
-  | GoToResearch(Researching.state);
+  | LoadFailed
+  | LoadSucceded(ResearchProgress.search)
+  | GoToResearch(ResearchProgress.search)
+  | ShowResults(ResearchProgress.result);
 
 let reducer = (state, action) => {
   switch (state, action) {
-  | (Importing, GoToResearch(state)) => Researching(state)
+  | (Importing(_), GoToResearch(state)) => Researching(state)
+  | (Importing(_), LoadSucceded(state)) => Importing(Some(state))
+  | (Researching(_), GoToResearch(state)) => Researching(state)
+  | (Researching(_), ShowResults(result)) =>
+    let csv = Papa.unparse(result);
+    Result(FileSaver.Blob.make([|csv|], {type_: "text/csv"}));
   | _ => state
   };
 };
 
 [@react.component]
 let make = () => {
-  let (state, dispatch) = React.useReducer(reducer, Importing);
+  open Belt.Result;
+  open ResearchProgress;
+  let (state, dispatch) = React.useReducer(reducer, Importing(None));
+  React.useEffect1(
+    () => {
+      if (state == Importing(None)) {
+        switch (ResearchProgress.load()) {
+        | Some({currentSearch: Some(search)}) =>
+          dispatch(LoadSucceded(search))
+        | Some({result}) => dispatch(ShowResults(result))
+        | None => dispatch(LoadFailed)
+        };
+      };
+      None;
+    },
+    [|state|],
+  );
+  let handleNewState = state => {
+    switch (state) {
+    | {currentSearch: Some(search)} => dispatch(GoToResearch(search))
+    | {result} => dispatch(ShowResults(result))
+    };
+  };
   switch (state) {
-  | Importing =>
+  | Importing(saved) =>
     <ImportFlow
-      submit={(~config, ~database) =>
-        dispatch(GoToResearch(Researching.makeState(~config, ~database)))
+      loadSaved={
+        switch (saved) {
+        | Some(search) => Some(() => dispatch(GoToResearch(search)))
+        | None => None
+        }
+      }
+      submit={(~config, ~database) => {
+        ResearchProgress.make(~config, ~database)
+        |> Js.Promise.then_(result =>
+             (
+               switch (result) {
+               | Ok({currentSearch: Some(search)}) =>
+                 dispatch(GoToResearch(search))
+               | Ok(_) => alert(Strings.noMatches)
+               | Error(error) => alert(error)
+               }
+             )
+             |> Js.Promise.resolve
+           )
+        |> ignore
+      }}
+    />
+  | Researching({slug, getTextHTML, submit, back, saveProgress}) =>
+    <Researching
+      saveProgress
+      slug
+      textHTML={getTextHTML()}
+      onYes={() => handleNewState(submit(true))}
+      onNo={() => handleNewState(submit(false))}
+      onBack={
+        switch (back) {
+        | Some(handler) => Some(() => handleNewState(handler()))
+        | None => None
+        }
       }
     />
-  | Researching(state) => <Researching state />
-  | Result(_, researchResult) => <ResearchResult researchResult />
+  | Result(researchResult) => <ResearchResult researchResult />
   };
 };
