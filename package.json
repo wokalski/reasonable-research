@@ -1,12 +1,11 @@
 {
-  "name": "reasonable research",
+  "name": "reasonable-research",
   "version": "0.1.0",
   "scripts": {
     "build": "bsb -make-world",
     "start": "bsb -make-world -w -ws _ ",
     "clean": "bsb -clean-world",
     "server": "moduleserve ./ --port 8000",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build:css": "tailwind build main.css -o generated.css",
     "prod:css": "postcss main.css -o ./bundleOutput/generated.css",
     "prod": "yarn build && yarn prod:css && webpack"
