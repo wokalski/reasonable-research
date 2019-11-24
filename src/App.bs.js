@@ -1,5 +1,6 @@
 'use strict';
 
+var List = require("bs-platform/lib/js/list.js");
 var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
@@ -127,8 +128,13 @@ function App(Props) {
           tmp$1 = undefined;
         }
         return React.createElement(Researching$ReasonReactExamples.make, {
-                    slug: match$1.slug,
-                    textHTML: Curry._1(match$1.getTextHTML, /* () */0),
+                    resultColumn: match$1.resultColumn,
+                    items: List.map((function (param) {
+                            return {
+                                    slug: param.slug,
+                                    textHTML: Curry._1(param.getTextHTML, /* () */0)
+                                  };
+                          }), match$1.items),
                     onYes: (function (param) {
                         return handleNewState(Curry._1(submit, true));
                       }),

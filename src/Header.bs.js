@@ -5,7 +5,7 @@ var React = require("react");
 function Header(Props) {
   var title = Props.title;
   return React.createElement("h1", {
-              className: "my-4"
+              className: "mt-4"
             }, title);
 }
 

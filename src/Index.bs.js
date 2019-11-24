@@ -32,7 +32,7 @@ var Link = {
 
 function Index$Footer(Props) {
   return React.createElement("footer", {
-              className: "text-gray-800 text-xs font-medium items-end px-2 py-2 bg-red-300"
+              className: "text-gray-800 text-xs font-medium items-end px-2 py-2 mt-4 bg-red-300"
             }, React.createElement("span", undefined, "Made by "), React.createElement(Index$Footer$Link, {
                   href: "https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif",
                   text: "Marta Konopko"

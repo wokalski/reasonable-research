@@ -1,9 +1,14 @@
 type result = array(Js.Dict.t(string));
 
-type search = {
-  saveProgress: unit => unit,
+type searchItem = {
   slug: string,
   getTextHTML: unit => React.element,
+};
+
+type search = {
+  resultColumn: string,
+  items: list(searchItem),
+  saveProgress: unit => unit,
   submit: bool => t,
   back: option(unit => t),
 }

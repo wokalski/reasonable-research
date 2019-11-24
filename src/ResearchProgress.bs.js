@@ -12,6 +12,9 @@ var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var Belt_Option = require("bs-platform/lib/js/belt_Option.js");
 var Belt_Result = require("bs-platform/lib/js/belt_Result.js");
 var Caml_option = require("bs-platform/lib/js/caml_option.js");
+var Caml_primitive = require("bs-platform/lib/js/caml_primitive.js");
+var Belt_HashMapInt = require("bs-platform/lib/js/belt_HashMapInt.js");
+var Belt_HashMapString = require("bs-platform/lib/js/belt_HashMapString.js");
 var Papa$ReasonReactExamples = require("./Papa.bs.js");
 var Window$ReasonReactExamples = require("./Window.bs.js");
 var Strings$ReasonReactExamples = require("./Strings.bs.js");
@@ -65,9 +68,9 @@ var removeQueryIndex = match$1[1];
 
 var saveQueryIndex = match$1[0];
 
-function getInitialQueryState(rowIndex, queryIndex, database, queries) {
+function getInitialQueryState(rowIndex, queryIndex, database, queryGroups) {
   var dbLength = database.length;
-  var queriesLength = queries.length;
+  var queriesLength = queryGroups.length;
   if (dbLength > 0 && queriesLength > 0) {
     var match = queryIndex < queriesLength;
     var queryIndex$1 = match ? queryIndex : 0;
@@ -75,7 +78,7 @@ function getInitialQueryState(rowIndex, queryIndex, database, queries) {
     var rowIndex$1 = match$1 ? rowIndex : 0;
     return {
             queryIndex: queryIndex$1,
-            queries: queries,
+            queryGroups: queryGroups,
             rowIndex: rowIndex$1
           };
   }
@@ -83,19 +86,19 @@ function getInitialQueryState(rowIndex, queryIndex, database, queries) {
 }
 
 function getNextQueryState(database, queryState) {
-  if (database.length !== 0) {
+  if (database.length > 0) {
     if (database.length > (queryState.rowIndex + 1 | 0)) {
       return {
               queryIndex: queryState.queryIndex,
-              queries: queryState.queries,
+              queryGroups: queryState.queryGroups,
               rowIndex: queryState.rowIndex + 1 | 0
             };
-    } else if ((queryState.queryIndex + 1 | 0) === queryState.queries.length) {
+    } else if ((queryState.queryIndex + 1 | 0) === queryState.queryGroups.length) {
       return ;
     } else {
       return {
               queryIndex: queryState.queryIndex + 1 | 0,
-              queries: queryState.queries,
+              queryGroups: queryState.queryGroups,
               rowIndex: 0
             };
     }
@@ -107,41 +110,68 @@ function normalize(str) {
   return str.normalize("NFD").replace(new RegExp("[\\u0300-\\u036f]", "g"), "").toLowerCase();
 }
 
-function findKeyphrase(query, string) {
-  var normalizedQuery = normalize(query);
-  var normalizedString = normalize(string);
-  var length = normalizedQuery.length;
-  var findFromIndex = function (_index, _acc) {
-    while(true) {
-      var acc = _acc;
-      var index = _index;
-      var nextIndex = normalizedString.indexOf(normalizedQuery, index);
-      if (nextIndex === -1) {
-        return acc;
-      } else {
-        _acc = /* :: */[
-          {
-            from: nextIndex,
-            to_: (nextIndex + length | 0) + 1 | 0
-          },
-          acc
-        ];
-        _index = nextIndex + length | 0;
-        continue ;
-      }
-    };
-  };
-  return List.rev(findFromIndex(0, /* [] */0));
+function removeDuplicateLocations(l) {
+  var map = Belt_HashMapInt.make(List.length(l));
+  List.iter((function ($$location) {
+          var key = $$location.from;
+          var match = Belt_HashMapInt.get(map, key);
+          if (match !== undefined && match.to_ >= $$location.to_) {
+            return /* () */0;
+          } else {
+            return Belt_HashMapInt.set(map, key, $$location);
+          }
+        }), l);
+  var locations = Belt_HashMapInt.valuesToArray(map);
+  $$Array.sort((function (l1, l2) {
+          return Caml_primitive.caml_int_compare(l1.from, l2.from);
+        }), locations);
+  return locations;
+}
+
+function findKeyphrases(queries, string) {
+  return $$Array.to_list(removeDuplicateLocations(List.flatten(queries.map((function (query) {
+                              var query$1 = query;
+                              var string$1 = string;
+                              var normalizedQuery = normalize(query$1);
+                              var normalizedString = normalize(string$1);
+                              var length = normalizedQuery.length;
+                              var findFromIndex = function (_index, _acc) {
+                                while(true) {
+                                  var acc = _acc;
+                                  var index = _index;
+                                  var nextIndex = normalizedString.indexOf(normalizedQuery, index);
+                                  if (nextIndex === -1) {
+                                    return acc;
+                                  } else {
+                                    _acc = /* :: */[
+                                      {
+                                        from: nextIndex,
+                                        to_: (nextIndex + length | 0) + 1 | 0
+                                      },
+                                      acc
+                                    ];
+                                    _index = nextIndex + length | 0;
+                                    continue ;
+                                  }
+                                };
+                              };
+                              return List.rev(findFromIndex(0, /* [] */0));
+                            })).reduce((function (acc, locations) {
+                            return /* :: */[
+                                    locations,
+                                    acc
+                                  ];
+                          }), /* [] */0))));
 }
 
 function getQuery(param) {
-  return Caml_array.caml_array_get(param.queries, param.queryIndex);
+  return Caml_array.caml_array_get(param.queryGroups, param.queryIndex);
 }
 
 function generate(config, previous, database, queryState) {
-  var query = getQuery(queryState);
+  var match = getQuery(queryState);
+  var resultColumn = match.resultColumn;
   var row = Caml_array.caml_array_get(database, queryState.rowIndex);
-  var text = Js_dict.get(row, query.column);
   var nextSearch = function (previous) {
     var match = getNextQueryState(database, queryState);
     if (match !== undefined) {
@@ -153,75 +183,91 @@ function generate(config, previous, database, queryState) {
             };
     }
   };
-  if (text !== undefined) {
-    var text$1 = text;
-    var matches = findKeyphrase(query.keyphrase, text$1);
-    if (matches) {
-      var $$this = [];
-      var tmp;
-      if (previous !== undefined) {
-        var previous$1 = previous;
-        tmp = (function (param) {
-            return previous$1;
-          });
-      } else {
-        tmp = undefined;
-      }
-      Caml_obj.caml_update_dummy($$this, {
-            currentSearch: {
-              saveProgress: (function (param) {
-                  Curry._1(saveDb, Papaparse.unparse(database));
-                  Curry._1(saveConfig, Papaparse.unparse(config));
-                  Curry._1(saveQueryIndex, queryState.queryIndex);
-                  Curry._1(saveRowIndex, queryState.rowIndex);
-                  return Window$ReasonReactExamples.onBeforeUnload(undefined);
-                }),
-              slug: query.column + (" - " + query.keyphrase),
-              getTextHTML: (function (param) {
-                  var text$2 = text$1;
-                  var locations = matches;
-                  var match = List.fold_left((function (param, $$location) {
-                          var nonHighlighted = text$2.substring(param[0], $$location.from);
-                          var highlighted = text$2.substring($$location.from, $$location.to_);
-                          return /* tuple */[
-                                  $$location.to_,
-                                  /* :: */[
-                                    React.createElement(Highlighted$ReasonReactExamples.make, {
-                                          children: highlighted
-                                        }),
-                                    /* :: */[
-                                      nonHighlighted,
-                                      param[1]
-                                    ]
-                                  ]
-                                ];
-                        }), /* tuple */[
-                        0,
-                        /* [] */0
-                      ], locations);
-                  var acc = match[1];
-                  var prevMatchLocation = match[0];
-                  return $$Array.of_list(List.rev(prevMatchLocation < (text$2.length - 1 | 0) ? /* :: */[
-                                    text$2.substr(prevMatchLocation),
-                                    acc
-                                  ] : acc));
-                }),
-              submit: (function (result) {
-                  Window$ReasonReactExamples.onBeforeUnload((function (evt) {
-                          evt.returnValue = "WARNING, UNSAVED";
-                          return /* () */0;
-                        }));
-                  row[query.resultColumn] = result ? "1" : "0";
-                  return nextSearch($$this);
-                }),
-              back: tmp
-            },
-            result: database
-          });
-      return $$this;
+  var results = match.queries.reduce((function (acc, param) {
+          var keyphrases = param.keyphrases;
+          var column = param.column;
+          var text = Js_dict.get(row, column);
+          if (text !== undefined) {
+            var text$1 = text;
+            var matches = findKeyphrases(keyphrases, text$1);
+            if (matches) {
+              return /* :: */[
+                      {
+                        slug: column + (" - " + keyphrases.join(" | ")),
+                        getTextHTML: (function (param) {
+                            var text$2 = text$1;
+                            var locations = matches;
+                            var match = List.fold_left((function (param, $$location) {
+                                    var nonHighlighted = text$2.substring(param[0], $$location.from);
+                                    var highlighted = text$2.substring($$location.from, $$location.to_);
+                                    return /* tuple */[
+                                            $$location.to_,
+                                            /* :: */[
+                                              React.createElement(Highlighted$ReasonReactExamples.make, {
+                                                    children: highlighted
+                                                  }),
+                                              /* :: */[
+                                                nonHighlighted,
+                                                param[1]
+                                              ]
+                                            ]
+                                          ];
+                                  }), /* tuple */[
+                                  0,
+                                  /* [] */0
+                                ], locations);
+                            var acc = match[1];
+                            var prevMatchLocation = match[0];
+                            return $$Array.of_list(List.rev(prevMatchLocation < (text$2.length - 1 | 0) ? /* :: */[
+                                              text$2.substr(prevMatchLocation),
+                                              acc
+                                            ] : acc));
+                          })
+                      },
+                      acc
+                    ];
+            } else {
+              return acc;
+            }
+          } else {
+            return acc;
+          }
+        }), /* [] */0);
+  if (results) {
+    var $$this = [];
+    var tmp;
+    if (previous !== undefined) {
+      var previous$1 = previous;
+      tmp = (function (param) {
+          return previous$1;
+        });
     } else {
-      return nextSearch(previous);
+      tmp = undefined;
     }
+    Caml_obj.caml_update_dummy($$this, {
+          currentSearch: {
+            resultColumn: resultColumn,
+            items: results,
+            saveProgress: (function (param) {
+                Curry._1(saveDb, Papaparse.unparse(database));
+                Curry._1(saveConfig, Papaparse.unparse(config));
+                Curry._1(saveQueryIndex, queryState.queryIndex);
+                Curry._1(saveRowIndex, queryState.rowIndex);
+                return Window$ReasonReactExamples.onBeforeUnload(undefined);
+              }),
+            submit: (function (result) {
+                Window$ReasonReactExamples.onBeforeUnload((function (evt) {
+                        evt.returnValue = "WARNING, UNSAVED";
+                        return /* () */0;
+                      }));
+                row[resultColumn] = result ? "1" : "0";
+                return nextSearch($$this);
+              }),
+            back: tmp
+          },
+          result: database
+        });
+    return $$this;
   } else {
     return nextSearch(previous);
   }
@@ -234,38 +280,41 @@ function createSearchState($staropt$star, $staropt$star$1, config, database, par
           if (acc.tag) {
             return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
           } else {
-            var switcher = row.length - 1 | 0;
-            if (switcher > 2 || switcher < 0) {
+            var queryGroups = acc[0];
+            if (row.length >= 3) {
+              var resultColumn = Caml_array.caml_array_get(row, 1);
+              var column = Caml_array.caml_array_get(row, 0);
+              var keyphrases = row.slice(2);
+              var match = Belt_HashMapString.get(queryGroups, resultColumn);
+              if (match !== undefined) {
+                match.queries.push({
+                      column: column,
+                      keyphrases: keyphrases
+                    });
+              } else {
+                Belt_HashMapString.set(queryGroups, resultColumn, {
+                      queries: /* array */[{
+                          column: column,
+                          keyphrases: keyphrases
+                        }],
+                      resultColumn: resultColumn
+                    });
+              }
+              return /* Ok */Block.__(0, [queryGroups]);
+            } else if (row.length !== 1) {
               return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
             } else {
-              var queries = acc[0];
-              switch (switcher) {
-                case 0 :
-                    var match = row[0];
-                    if (match === "") {
-                      return /* Ok */Block.__(0, [queries]);
-                    } else {
-                      return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
-                    }
-                case 1 :
-                    return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
-                case 2 :
-                    var column = row[0];
-                    var keyphrase = row[1];
-                    var resultColumn = row[2];
-                    queries.push({
-                          column: column,
-                          keyphrase: keyphrase,
-                          resultColumn: resultColumn
-                        });
-                    return /* Ok */Block.__(0, [queries]);
-                
+              var match$1 = row[0];
+              if (match$1 === "") {
+                return /* Ok */Block.__(0, [queryGroups]);
+              } else {
+                return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
               }
             }
           }
-        }), /* Ok */Block.__(0, [/* array */[]]));
-  return Belt_Result.flatMapU(result, (function (queries) {
-                var match = getInitialQueryState(rowIndex, queryIndex, database, queries);
+        }), /* Ok */Block.__(0, [Belt_HashMapString.make(config.length)]));
+  return Belt_Result.flatMapU(result, (function (queryGroups) {
+                var match = getInitialQueryState(rowIndex, queryIndex, database, Belt_HashMapString.valuesToArray(queryGroups));
                 if (match !== undefined) {
                   return /* Ok */Block.__(0, [generate(config, undefined, database, match)]);
                 } else {

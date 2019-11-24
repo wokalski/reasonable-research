@@ -55,10 +55,12 @@ let make = (~loadSaved, ~submit) => {
          {Belt.Result.(
             switch (config, currentDatabase) {
             | (Ok(config), Some(Ok(database))) =>
-              <LinkButton
-                onClick={_ => submit(~config, ~database)}
-                title=Strings.next
-              />
+              <div className="mt-6">
+                <LinkButton
+                  onClick={_ => submit(~config, ~database)}
+                  title=Strings.next
+                />
+              </div>
             | _ => React.null
             }
           )}

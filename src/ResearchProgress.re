@@ -26,13 +26,23 @@ type result = array(Js.Dict.t(string));
 
 type query = {
   column: string,
-  keyphrase: string,
+  keyphrases: array(string),
+};
+
+type queryGroup = {
+  queries: array(query),
   resultColumn: string,
 };
-type search = {
-  saveProgress: unit => unit,
+
+type searchItem = {
   slug: string,
   getTextHTML: unit => React.element,
+};
+
+type search = {
+  resultColumn: string,
+  items: list(searchItem),
+  saveProgress: unit => unit,
   submit: bool => t,
   back: option(unit => t),
 }
@@ -43,7 +53,7 @@ and t = {
 
 type queryState = {
   queryIndex: int,
-  queries: array(query),
+  queryGroups: array(queryGroup),
   rowIndex: int,
 };
 
@@ -52,29 +62,29 @@ type location = {
   to_: int,
 };
 
-let getInitialQueryState = (~rowIndex, ~queryIndex, ~database, ~queries) => {
+let getInitialQueryState = (~rowIndex, ~queryIndex, ~database, ~queryGroups) => {
   let dbLength = Js.Array.length(database);
-  let queriesLength = Js.Array.length(queries);
+  let queriesLength = Js.Array.length(queryGroups);
   if (dbLength > 0 && queriesLength > 0) {
     let queryIndex = queryIndex < queriesLength ? queryIndex : 0;
     let rowIndex = rowIndex < dbLength ? rowIndex : 0;
-    Some({queryIndex, queries, rowIndex});
+    Some({queryIndex, queryGroups, rowIndex});
   } else {
     None;
   };
 };
 
 let getNextQueryState = (~database, ~queryState) =>
-  if (Array.length(database) > 0) {
+  if (Js.Array.length(database) > 0) {
     if (Js.Array.length(database) > queryState.rowIndex + 1) {
       Some({...queryState, rowIndex: queryState.rowIndex + 1});
     } else if (queryState.queryIndex
-               + 1 == Js.Array.length(queryState.queries)) {
+               + 1 == Js.Array.length(queryState.queryGroups)) {
       None;
     } else {
       Some({
         queryIndex: queryState.queryIndex + 1,
-        queries: queryState.queries,
+        queryGroups: queryState.queryGroups,
         rowIndex: 0,
       });
     };
@@ -107,6 +117,34 @@ let findKeyphrase = (~query, string) => {
     };
   };
   findFromIndex(0, []) |> List.rev;
+};
+
+module LocationHash = Belt.HashMap.Int;
+
+let removeDuplicateLocations = l => {
+  let map = Belt.HashMap.Int.make(~hintSize=List.length(l));
+  List.iter(
+    ({from: key} as location) => {
+      switch (LocationHash.get(map, key)) {
+      | Some(existingLocation) when existingLocation.to_ < location.to_ =>
+        LocationHash.set(map, key, location)
+      | None => LocationHash.set(map, key, location)
+      | _ => ()
+      }
+    },
+    l,
+  );
+  let locations = LocationHash.valuesToArray(map);
+  Array.sort((l1, l2) => compare(l1.from, l2.from), locations);
+  locations;
+};
+
+let findKeyphrases = (~queries, string) => {
+  Js.Array.map(query => findKeyphrase(~query, string), queries)
+  |> Js.Array.reduce((acc, locations) => [locations, ...acc], [])
+  |> List.flatten
+  |> removeDuplicateLocations
+  |> Array.to_list;
 };
 
 let buildTextHTML = (~text, ~locations) => {
@@ -146,13 +184,16 @@ let buildTextHTML = (~text, ~locations) => {
   |> React.array;
 };
 
-let getQuery = ({queryIndex, queries}) => queries[queryIndex];
+let getQuery = ({queryIndex, queryGroups}) => queryGroups[queryIndex];
+
+let keyphrasesToString = array => {
+  Js.Array.joinWith(" | ", array);
+};
 
 let rec generate = (~config, ~previous, ~database, ~queryState) => {
   let {rowIndex} = queryState;
-  let query = getQuery(queryState);
+  let {queries, resultColumn} = getQuery(queryState);
   let row = database[rowIndex];
-  let text = Js.Dict.get(row, query.column);
   let nextSearch = (~previous) => {
     switch (getNextQueryState(~database, ~queryState)) {
     | Some(nextQueryState) =>
@@ -160,44 +201,65 @@ let rec generate = (~config, ~previous, ~database, ~queryState) => {
     | None => {currentSearch: None, result: database}
     };
   };
-  switch (text) {
-  | None => nextSearch(~previous)
-  | Some(text) =>
-    let matches = findKeyphrase(~query=query.keyphrase, text);
-    switch (matches) {
-    | [] => nextSearch(~previous)
-    | locations =>
-      let rec this = {
-        currentSearch:
-          Some({
-            saveProgress: () => {
-              LocalStorage.saveDb(Papa.unparse(database));
-              LocalStorage.saveConfig(Papa.unparseWithoutHeaders(config));
-              LocalStorage.saveQueryIndex(queryState.queryIndex);
-              LocalStorage.saveRowIndex(queryState.rowIndex);
-              Window.onBeforeUnload(None);
-            },
-            slug: query.column ++ " - " ++ query.keyphrase,
-            getTextHTML: () => buildTextHTML(~text, ~locations),
-            submit: result => {
-              Window.onBeforeUnload(
-                Some(evt => evt.returnValue = "WARNING, UNSAVED"),
-              );
-              Js.Dict.set(row, query.resultColumn, result ? "1" : "0");
-              nextSearch(~previous=Some(this));
-            },
-            back:
-              switch (previous) {
-              | Some(previous) => Some(() => previous)
-              | None => None
+  let results =
+    Js.Array.reduce(
+      (acc, {column, keyphrases}) => {
+        let text = Js.Dict.get(row, column);
+        switch (text) {
+        | None => acc
+        | Some(text) =>
+          let matches = findKeyphrases(~queries=keyphrases, text);
+          switch (matches) {
+          | [] => acc
+          | locations => [
+              {
+                slug: column ++ " - " ++ keyphrasesToString(keyphrases),
+                getTextHTML: () => buildTextHTML(~text, ~locations),
               },
-          }),
-        result: database,
-      };
-      this;
+              ...acc,
+            ]
+          };
+        };
+      },
+      [],
+      queries,
+    );
+
+  switch (results) {
+  | [] => nextSearch(~previous)
+  | items =>
+    let rec this = {
+      currentSearch:
+        Some({
+          resultColumn,
+          items,
+          saveProgress: () => {
+            LocalStorage.saveDb(Papa.unparse(database));
+            LocalStorage.saveConfig(Papa.unparseWithoutHeaders(config));
+            LocalStorage.saveQueryIndex(queryState.queryIndex);
+            LocalStorage.saveRowIndex(queryState.rowIndex);
+            Window.onBeforeUnload(None);
+          },
+          submit: result => {
+            Window.onBeforeUnload(
+              Some(evt => evt.returnValue = "WARNING, UNSAVED"),
+            );
+            Js.Dict.set(row, resultColumn, result ? "1" : "0");
+            nextSearch(~previous=Some(this));
+          },
+          back:
+            switch (previous) {
+            | Some(previous) => Some(() => previous)
+            | None => None
+            },
+        }),
+      result: database,
     };
+    this;
   };
 };
+
+module QueryGroupHash = Belt.HashMap.String;
 
 let createSearchState = (~rowIndex=0, ~queryIndex=0, ~config, ~database, ()) => {
   open Belt.Result;
@@ -205,17 +267,36 @@ let createSearchState = (~rowIndex=0, ~queryIndex=0, ~config, ~database, ()) => 
     Js.Array.reduce(
       (acc, row) =>
         switch (acc, row) {
-        | (Ok(queries), [|column, keyphrase, resultColumn|]) =>
-          Js.Array.push({column, keyphrase, resultColumn}, queries) |> ignore;
-          Ok(queries);
+        | (Ok(queryGroups), l) when Js.Array.length(l) >= 3 =>
+          let resultColumn = l[1];
+          let column = l[0];
+          let keyphrases = Js.Array.sliceFrom(2, l);
+          switch (QueryGroupHash.get(queryGroups, resultColumn)) {
+          | Some({queries}) =>
+            Js.Array.push({column, keyphrases}, queries) |> ignore
+          | None =>
+            QueryGroupHash.set(
+              queryGroups,
+              resultColumn,
+              {resultColumn, queries: [|{column, keyphrases}|]},
+            )
+          };
+          Ok(queryGroups);
         | (Ok(queries), [|""|]) => Ok(queries)
         | _ => Error(Strings.invalidConfigFormat)
         },
-      Ok([||]),
+      Ok(QueryGroupHash.make(~hintSize=Js.Array.length(config))),
       config,
     );
-  flatMapU(result, (. queries) =>
-    switch (getInitialQueryState(~rowIndex, ~queryIndex, ~database, ~queries)) {
+  flatMapU(result, (. queryGroups) =>
+    switch (
+      getInitialQueryState(
+        ~rowIndex,
+        ~queryIndex,
+        ~database,
+        ~queryGroups=QueryGroupHash.valuesToArray(queryGroups),
+      )
+    ) {
     | None => Error(Strings.noMatches)
     | Some(queryState) =>
       Ok(generate(~config, ~previous=None, ~database, ~queryState))

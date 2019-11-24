@@ -24,7 +24,7 @@ module Footer = {
   [@react.component]
   let make = () =>
     <footer
-      className="text-gray-800 text-xs font-medium items-end px-2 py-2 bg-red-300">
+      className="text-gray-800 text-xs font-medium items-end px-2 py-2 mt-4 bg-red-300">
       <span> {React.string("Made by ")} </span>
       <Link
         href="https://media.giphy.com/media/JIX9t2j0ZTN9S/giphy.gif"

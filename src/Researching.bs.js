@@ -1,5 +1,7 @@
 'use strict';
 
+var List = require("bs-platform/lib/js/list.js");
+var $$Array = require("bs-platform/lib/js/array.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
 var Header$ReasonReactExamples = require("./Header.bs.js");
@@ -7,6 +9,7 @@ var Strings$ReasonReactExamples = require("./Strings.bs.js");
 var LinkButton$ReasonReactExamples = require("./LinkButton.bs.js");
 
 function Researching$ControlButtons(Props) {
+  var title = Props.title;
   var onYes = Props.onYes;
   var onNo = Props.onNo;
   var onBack = Props.onBack;
@@ -25,8 +28,12 @@ function Researching$ControlButtons(Props) {
   return React.createElement("div", {
               className: "flex justify-between"
             }, React.createElement("span", undefined, tmp), React.createElement("div", {
-                  className: "flex flex-row"
-                }, React.createElement(LinkButton$ReasonReactExamples.make, {
+                  className: "flex flex-row mt-6 "
+                }, React.createElement("div", {
+                      className: "text-md flex flex-col justify-center font-semibold text-grey-800"
+                    }, Strings$ReasonReactExamples.resultColumn + (": " + title)), React.createElement("div", {
+                      className: "w-6"
+                    }), React.createElement(LinkButton$ReasonReactExamples.make, {
                       title: Strings$ReasonReactExamples.no,
                       onClick: (function (param) {
                           return Curry._1(onNo, /* () */0);
@@ -46,8 +53,8 @@ var ControlButtons = {
 };
 
 function Researching(Props) {
-  var slug = Props.slug;
-  var textHTML = Props.textHTML;
+  var resultColumn = Props.resultColumn;
+  var items = Props.items;
   var onYes = Props.onYes;
   var onNo = Props.onNo;
   var onBack = Props.onBack;
@@ -59,17 +66,24 @@ function Researching(Props) {
                 }, React.createElement(Header$ReasonReactExamples.make, {
                       title: Strings$ReasonReactExamples.researchTitle
                     }), React.createElement("button", {
-                      className: "bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4",
+                      className: "flex flex-col bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4 justify-end",
                       onClick: (function (param) {
                           return Curry._1(saveProgress, /* () */0);
                         })
-                    }, Strings$ReasonReactExamples.saveProgress)), React.createElement("div", {
-                  className: "pb-5"
-                }, React.createElement("span", {
-                      className: "font-medium text-lg text-blue-900"
-                    }, slug)), React.createElement("div", {
-                  className: "h-64 p-3 border border-solid rounded border-gray-400"
-                }, textHTML), React.createElement(Researching$ControlButtons, {
+                    }, React.createElement("span", undefined, Strings$ReasonReactExamples.saveProgress))), $$Array.of_list(List.map((function (param) {
+                        var slug = param.slug;
+                        return React.createElement(React.Fragment, {
+                                    children: null,
+                                    key: slug
+                                  }, React.createElement("div", {
+                                        className: "pt-8 pb-5"
+                                      }, React.createElement("span", {
+                                            className: "font-medium text-lg text-blue-900"
+                                          }, slug)), React.createElement("div", {
+                                        className: "h-64 p-3 border border-solid rounded border-gray-400"
+                                      }, param.textHTML));
+                      }), items)), React.createElement(Researching$ControlButtons, {
+                  title: resultColumn,
                   onYes: onYes,
                   onNo: onNo,
                   onBack: onBack

@@ -43,6 +43,8 @@ var saveProgress = "Zapisz";
 
 var loadSaved = "Przywróć zapisaną sesję";
 
+var resultColumn = "Kolumna docelowa";
+
 exports.$$Error = $$Error;
 exports.importConfig = importConfig;
 exports.importDatabase = importDatabase;
@@ -63,4 +65,5 @@ exports.selectFile = selectFile;
 exports.selectedFile = selectedFile;
 exports.saveProgress = saveProgress;
 exports.loadSaved = loadSaved;
+exports.resultColumn = resultColumn;
 /* No side effect */

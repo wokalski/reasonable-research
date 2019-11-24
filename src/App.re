@@ -75,11 +75,15 @@ let make = () => {
         |> ignore
       }}
     />
-  | Researching({slug, getTextHTML, submit, back, saveProgress}) =>
+  | Researching({resultColumn, items, submit, back, saveProgress}) =>
     <Researching
+      items={List.map(
+        ({slug, getTextHTML}) =>
+          {Researching.slug, textHTML: getTextHTML()},
+        items,
+      )}
+      resultColumn
       saveProgress
-      slug
-      textHTML={getTextHTML()}
       onYes={() => handleNewState(submit(true))}
       onNo={() => handleNewState(submit(false))}
       onBack={

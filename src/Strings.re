@@ -20,3 +20,4 @@ let selectFile = {js|Wybierz plik|js};
 let selectedFile = {js|Wybrano:|js};
 let saveProgress = {js|Zapisz|js};
 let loadSaved = {js|Przywróć zapisaną sesję|js};
+let resultColumn = {js|Kolumna docelowa|js};

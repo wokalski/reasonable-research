@@ -77,12 +77,14 @@ function ImportFlow(Props) {
         tmp$2 = null;
       } else {
         var database = match$2[0];
-        tmp$2 = React.createElement(LinkButton$ReasonReactExamples.make, {
-              title: Strings$ReasonReactExamples.next,
-              onClick: (function (param) {
-                  return Curry._2(submit, config$1, database);
-                })
-            });
+        tmp$2 = React.createElement("div", {
+              className: "mt-6"
+            }, React.createElement(LinkButton$ReasonReactExamples.make, {
+                  title: Strings$ReasonReactExamples.next,
+                  onClick: (function (param) {
+                      return Curry._2(submit, config$1, database);
+                    })
+                }));
       }
     }
     tmp$1 = React.createElement(React.Fragment, {
