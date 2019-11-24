@@ -199,9 +199,9 @@ function generate(config, previous, database, queryState) {
                             var locations = matches;
                             var match = List.fold_left((function (param, $$location) {
                                     var nonHighlighted = text$2.substring(param[0], $$location.from);
-                                    var highlighted = text$2.substring($$location.from, $$location.to_);
+                                    var highlighted = text$2.substring($$location.from, $$location.to_ - 1 | 0);
                                     return /* tuple */[
-                                            $$location.to_,
+                                            $$location.to_ - 1 | 0,
                                             /* :: */[
                                               React.createElement(Highlighted$ReasonReactExamples.make, {
                                                     children: highlighted
@@ -284,23 +284,29 @@ function createSearchState($staropt$star, $staropt$star$1, config, database, par
             if (row.length >= 3) {
               var resultColumn = Caml_array.caml_array_get(row, 1);
               var column = Caml_array.caml_array_get(row, 0);
-              var keyphrases = row.slice(2);
-              var match = Belt_HashMapString.get(queryGroups, resultColumn);
-              if (match !== undefined) {
-                match.queries.push({
-                      column: column,
-                      keyphrases: keyphrases
-                    });
+              var keyphrases = row.slice(2).filter((function (x) {
+                      return x.length > 0;
+                    }));
+              if (keyphrases.length > 0) {
+                var match = Belt_HashMapString.get(queryGroups, resultColumn);
+                if (match !== undefined) {
+                  match.queries.push({
+                        column: column,
+                        keyphrases: keyphrases
+                      });
+                } else {
+                  Belt_HashMapString.set(queryGroups, resultColumn, {
+                        queries: /* array */[{
+                            column: column,
+                            keyphrases: keyphrases
+                          }],
+                        resultColumn: resultColumn
+                      });
+                }
+                return /* Ok */Block.__(0, [queryGroups]);
               } else {
-                Belt_HashMapString.set(queryGroups, resultColumn, {
-                      queries: /* array */[{
-                          column: column,
-                          keyphrases: keyphrases
-                        }],
-                      resultColumn: resultColumn
-                    });
+                return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
               }
-              return /* Ok */Block.__(0, [queryGroups]);
             } else if (row.length !== 1) {
               return /* Error */Block.__(1, [Strings$ReasonReactExamples.invalidConfigFormat]);
             } else {

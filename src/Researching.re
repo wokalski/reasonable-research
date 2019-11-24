@@ -10,7 +10,10 @@ module ControlButtons = {
          }}
       </span>
       <div className="flex flex-row mt-6 ">
-        <div className="text-md flex flex-col justify-center font-semibold text-grey-800"> {React.string(Strings.resultColumn ++ ": " ++ title)} </div>
+        <div
+          className="text-md flex flex-col justify-center font-semibold text-grey-800">
+          {React.string(Strings.resultColumn ++ ": " ++ title)}
+        </div>
         <div className="w-6" />
         <LinkButton title=Strings.no onClick={_ => onNo()} />
         <div className="w-6" />
@@ -32,9 +35,7 @@ let make = (~resultColumn, ~items, ~onYes, ~onNo, ~onBack, ~saveProgress) => {
       <button
         className="flex flex-col bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4 justify-center"
         onClick={_ => saveProgress()}>
-        <span>
-        {React.string(Strings.saveProgress)}
-        </span>
+        <span> {React.string(Strings.saveProgress)} </span>
       </button>
     </div>
     {items
@@ -46,7 +47,7 @@ let make = (~resultColumn, ~items, ~onYes, ~onNo, ~onBack, ~saveProgress) => {
               </span>
             </div>
             <div
-              className="h-64 p-3 border border-solid rounded border-gray-400">
+              className="h-64 p-3 border border-solid rounded border-gray-400 overflow-scroll">
               textHTML
             </div>
           </React.Fragment>

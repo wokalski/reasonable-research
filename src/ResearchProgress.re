@@ -159,10 +159,10 @@ let buildTextHTML = (~text, ~locations) => {
           )
           |> React.string;
         let highlighted =
-          Js.String.substring(~from=location.from, ~to_=location.to_, text)
+          Js.String.substring(~from=location.from, ~to_=location.to_ - 1, text)
           |> React.string;
         (
-          location.to_,
+          location.to_ - 1,
           [<Highlighted> highlighted </Highlighted>, nonHighlighted, ...acc],
         );
       },
@@ -270,18 +270,24 @@ let createSearchState = (~rowIndex=0, ~queryIndex=0, ~config, ~database, ()) => 
         | (Ok(queryGroups), l) when Js.Array.length(l) >= 3 =>
           let resultColumn = l[1];
           let column = l[0];
-          let keyphrases = Js.Array.sliceFrom(2, l);
-          switch (QueryGroupHash.get(queryGroups, resultColumn)) {
-          | Some({queries}) =>
-            Js.Array.push({column, keyphrases}, queries) |> ignore
-          | None =>
-            QueryGroupHash.set(
-              queryGroups,
-              resultColumn,
-              {resultColumn, queries: [|{column, keyphrases}|]},
-            )
+          let keyphrases =
+            Js.Array.sliceFrom(2, l)
+            |> Js.Array.filter(x => Js.String.length(x) > 0);
+          if (Js.Array.length(keyphrases) > 0) {
+            switch (QueryGroupHash.get(queryGroups, resultColumn)) {
+            | Some({queries}) =>
+              Js.Array.push({column, keyphrases}, queries) |> ignore
+            | None =>
+              QueryGroupHash.set(
+                queryGroups,
+                resultColumn,
+                {resultColumn, queries: [|{column, keyphrases}|]},
+              )
+            };
+            Ok(queryGroups);
+          } else {
+            Error(Strings.invalidConfigFormat);
           };
-          Ok(queryGroups);
         | (Ok(queries), [|""|]) => Ok(queries)
         | _ => Error(Strings.invalidConfigFormat)
         },

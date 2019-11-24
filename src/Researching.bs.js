@@ -80,7 +80,7 @@ function Researching(Props) {
                                       }, React.createElement("span", {
                                             className: "font-medium text-lg text-blue-900"
                                           }, slug)), React.createElement("div", {
-                                        className: "h-64 p-3 border border-solid rounded border-gray-400"
+                                        className: "h-64 p-3 border border-solid rounded border-gray-400 overflow-scroll"
                                       }, param.textHTML));
                       }), items)), React.createElement(Researching$ControlButtons, {
                   title: resultColumn,
