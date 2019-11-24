@@ -724,6 +724,16 @@ a {
           align-items: center;
 }
 
+.justify-end {
+  -webkit-box-pack: end;
+          justify-content: flex-end;
+}
+
+.justify-center {
+  -webkit-box-pack: center;
+          justify-content: center;
+}
+
 .justify-between {
   -webkit-box-pack: justify;
           justify-content: space-between;
@@ -752,11 +762,6 @@ a {
 
 .h-64 {
   height: 16rem;
-}
-
-.my-4 {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
 }
 
 .mx-auto {
@@ -821,6 +826,10 @@ a {
 
 .pb-5 {
   padding-bottom: 1.25rem;
+}
+
+.pt-8 {
+  padding-top: 2rem;
 }
 
 .text-center {

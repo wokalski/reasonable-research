@@ -17,7 +17,9 @@
       <p>The data you use in the app never leaves your computer (i.e. it's not uploaded to a server whatsoever) so there are no legal issues with using this tool with sensitive data.</p>
       <h2 class="mt-4 mb-2 font-semibold">Config file format</h2>
       <p class="mb-2">The config is a CSV file. It has the following format:</p>
-      <pre class="p-3 border border-solid bg-gray-100 rounded">SOURCE_COLUMN;SEARCH_PHRASE;RESULT_COLUMN</pre>
+      <pre class="p-3 border border-solid bg-gray-100 rounded">SOURCE_COLUMN;RESULT_COLUMN;SEARCH_PHRASE</pre>
+      <p class="mb-2">You can include more keyphrases like so:</p>
+      <pre class="p-3 border border-solid bg-gray-100 rounded">SOURCE_COLUMN;RESULT_COLUMN;SEARCH_PHRASE;SEARCH_PHRASE_2;SEARCH_PHRASE_3</pre>
       <h2 class="mt-4 mb-2 font-semibold">Database format</h2>
       <span class="mb-2">Database is expected to be a CSV file with header. For every row in the config file, the script will look in the <pre class="text-red-600 inline">$SOURCE_COLUMN</pre> for text matching the <pre class="text-red-600 inline">$SEARCH_PHRASE</pre> and depending on the answer (yes or no), it'll set 1 or 0 in the <pre class="text-red-600 inline">$RESULT_COLUMN</pre> </span>
     </div>
