@@ -30,7 +30,7 @@ let make = (~resultColumn, ~items, ~onYes, ~onNo, ~onBack, ~saveProgress) => {
     <div className="flex">
       <Header title=Strings.researchTitle />
       <button
-        className="flex flex-col bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4 justify-end"
+        className="flex flex-col bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4 justify-center"
         onClick={_ => saveProgress()}>
         <span>
         {React.string(Strings.saveProgress)}

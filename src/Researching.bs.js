@@ -66,7 +66,7 @@ function Researching(Props) {
                 }, React.createElement(Header$ReasonReactExamples.make, {
                       title: Strings$ReasonReactExamples.researchTitle
                     }), React.createElement("button", {
-                      className: "flex flex-col bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4 justify-end",
+                      className: "flex flex-col bg-white hover:text-red-600 text-red-400 font-normal underline text-lg ml-4 justify-center",
                       onClick: (function (param) {
                           return Curry._1(saveProgress, /* () */0);
                         })
