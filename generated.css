@@ -796,6 +796,10 @@ a {
   min-height: 100vh;
 }
 
+.overflow-scroll {
+  overflow: scroll;
+}
+
 .p-3 {
   padding: 0.75rem;
 }
