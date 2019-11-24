@@ -724,11 +724,6 @@ a {
           align-items: center;
 }
 
-.justify-end {
-  -webkit-box-pack: end;
-          justify-content: flex-end;
-}
-
 .justify-center {
   -webkit-box-pack: center;
           justify-content: center;
