@@ -45,6 +45,8 @@ var loadSaved = "Przywróć zapisaną sesję";
 
 var resultColumn = "Kolumna docelowa";
 
+var dropFile = "Upuść plik tutaj";
+
 exports.$$Error = $$Error;
 exports.importConfig = importConfig;
 exports.importDatabase = importDatabase;
@@ -66,4 +68,5 @@ exports.selectedFile = selectedFile;
 exports.saveProgress = saveProgress;
 exports.loadSaved = loadSaved;
 exports.resultColumn = resultColumn;
+exports.dropFile = dropFile;
 /* No side effect */
