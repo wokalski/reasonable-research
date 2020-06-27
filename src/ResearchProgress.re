@@ -39,12 +39,19 @@ type searchItem = {
   getTextHTML: unit => React.element,
 };
 
+type submission =
+  | Yes
+  | No
+  | Idontknow;
+
 type search = {
   resultColumn: string,
   items: list(searchItem),
   saveProgress: unit => unit,
-  submit: bool => t,
+  submit: submission => t,
   back: option(unit => t),
+  row: Js.Dict.t(string),
+  currentValue: option(string),
 }
 and t = {
   currentSearch: option(search),
@@ -159,7 +166,11 @@ let buildTextHTML = (~text, ~locations) => {
           )
           |> React.string;
         let highlighted =
-          Js.String.substring(~from=location.from, ~to_=location.to_ - 1, text)
+          Js.String.substring(
+            ~from=location.from,
+            ~to_=location.to_ - 1,
+            text,
+          )
           |> React.string;
         (
           location.to_ - 1,
@@ -231,8 +242,10 @@ let rec generate = (~config, ~previous, ~database, ~queryState) => {
     let rec this = {
       currentSearch:
         Some({
+          row,
           resultColumn,
           items,
+          currentValue: Js.Dict.get(row, resultColumn),
           saveProgress: () => {
             LocalStorage.saveDb(Papa.unparse(database));
             LocalStorage.saveConfig(Papa.unparseWithoutHeaders(config));
@@ -244,7 +257,13 @@ let rec generate = (~config, ~previous, ~database, ~queryState) => {
             Window.onBeforeUnload(
               Some(evt => evt.returnValue = "WARNING, UNSAVED"),
             );
-            Js.Dict.set(row, resultColumn, result ? "1" : "0");
+            let setResult = Js.Dict.set(row, resultColumn);
+
+            switch (result) {
+            | Yes => setResult("1")
+            | No => setResult("0")
+            | Idontknow => ()
+            };
             nextSearch(~previous=Some(this));
           },
           back:
@@ -313,14 +332,14 @@ let createSearchState = (~rowIndex=0, ~queryIndex=0, ~config, ~database, ()) => 
 let make = (~config, ~database) =>
   Belt.Result.(
     Js.Promise.(
-      all2((Papa.parse(config), Papa.parseWithHeader(database)))
-      |> then_(
-           fun
-           | (Ok(config), Ok(database)) => {
-               createSearchState(~config, ~database, ()) |> resolve;
-             }
-           | (Error(_), _) => resolve(Error(Strings.couldntLoadConfig))
-           | (_, Error(_)) => resolve(Error(Strings.couldntLoadDatabase)),
+      Papa.parseWithHeader(database)
+      |> then_(database =>
+           switch (database) {
+           | Ok(database) =>
+             let config = Papa.String.parseWithoutHeader(config);
+             createSearchState(~config, ~database, ()) |> resolve;
+           | Error(_) => resolve(Error(Strings.couldntLoadDatabase))
+           }
          )
     )
   );

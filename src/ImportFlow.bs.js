@@ -1,116 +1,82 @@
 'use strict';
 
-var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var React = require("react");
+var Header$ReasonReactExamples = require("./Header.bs.js");
 var Strings$ReasonReactExamples = require("./Strings.bs.js");
 var RedButton$ReasonReactExamples = require("./RedButton.bs.js");
 var FileImport$ReasonReactExamples = require("./FileImport.bs.js");
 var LinkButton$ReasonReactExamples = require("./LinkButton.bs.js");
 
 function reducer(state, action) {
-  if (state.tag) {
-    if (action.tag) {
-      return /* ImportingDatabase */Block.__(1, [
-                state[0],
-                action[0]
-              ]);
-    } else {
-      return /* ImportingDatabase */Block.__(1, [
-                action[0],
-                state[1]
-              ]);
-    }
-  } else if (action.tag) {
-    return state;
-  } else {
-    var result = action[0];
-    if (result.tag) {
-      return /* ImportingConfig */Block.__(0, [result]);
-    } else {
-      return /* ImportingDatabase */Block.__(1, [
-                /* Ok */Block.__(0, [result[0]]),
-                undefined
-              ]);
-    }
-  }
-}
-
-function currentConfig(param) {
-  if (param.tag) {
-    return param[0];
-  } else {
-    return param[0];
-  }
+  return /* ImportingDatabase */[action[0]];
 }
 
 function ImportFlow(Props) {
   var loadSaved = Props.loadSaved;
   var submit = Props.submit;
-  var match = React.useReducer(reducer, /* ImportingConfig */Block.__(0, [undefined]));
+  var match = React.useReducer(reducer, /* ImportingDatabase */[undefined]);
   var dispatch = match[1];
-  var state = match[0];
-  var match$1 = currentConfig(state);
+  var currentDatabase = match[0][0];
+  var match$1 = React.useState((function () {
+          return "";
+        }));
+  var setConfig = match$1[1];
+  var config = match$1[0];
   var tmp;
-  if (loadSaved !== undefined && match$1 === undefined) {
+  if (loadSaved !== undefined) {
     var load = loadSaved;
-    tmp = React.createElement("button", {
-          className: RedButton$ReasonReactExamples.className + " mt-4",
-          onClick: (function (param) {
-              return Curry._1(load, /* () */0);
-            })
-        }, Strings$ReasonReactExamples.loadSaved);
+    tmp = config === "" ? React.createElement("button", {
+            className: RedButton$ReasonReactExamples.className + " mt-4",
+            onClick: (function (param) {
+                return Curry._1(load, /* () */0);
+              })
+          }, Strings$ReasonReactExamples.loadSaved) : null;
   } else {
     tmp = null;
   }
   var tmp$1;
-  if (state.tag) {
-    var currentDatabase = state[1];
-    var config = state[0];
-    var tmp$2;
-    if (config.tag || currentDatabase === undefined) {
-      tmp$2 = null;
+  if (currentDatabase !== undefined) {
+    var match$2 = currentDatabase;
+    if (match$2.tag) {
+      tmp$1 = null;
     } else {
-      var match$2 = currentDatabase;
-      var config$1 = config[0];
-      if (match$2.tag) {
-        tmp$2 = null;
-      } else {
-        var database = match$2[0];
-        tmp$2 = React.createElement("div", {
-              className: "mt-6"
-            }, React.createElement(LinkButton$ReasonReactExamples.make, {
-                  title: Strings$ReasonReactExamples.next,
-                  onClick: (function (param) {
-                      return Curry._2(submit, config$1, database);
-                    })
-                }));
-      }
+      var database = match$2[0];
+      tmp$1 = React.createElement("div", {
+            className: "mt-6"
+          }, React.createElement(LinkButton$ReasonReactExamples.make, {
+                title: Strings$ReasonReactExamples.next,
+                onClick: (function (param) {
+                    return Curry._2(submit, config, database);
+                  })
+              }));
     }
-    tmp$1 = React.createElement(React.Fragment, {
-          children: null
-        }, React.createElement(FileImport$ReasonReactExamples.make, {
-              title: Strings$ReasonReactExamples.importDatabase,
-              currentImport: currentDatabase,
-              onImportedFile: (function (file) {
-                  return Curry._1(dispatch, /* ImportedDatabase */Block.__(1, [file]));
-                })
-            }), tmp$2);
   } else {
     tmp$1 = null;
   }
-  return React.createElement("div", undefined, React.createElement(FileImport$ReasonReactExamples.make, {
-                  title: Strings$ReasonReactExamples.importConfig,
-                  currentImport: currentConfig(state),
-                  onImportedFile: (function (file) {
-                      return Curry._1(dispatch, /* ImportedConfig */Block.__(0, [file]));
+  return React.createElement("div", undefined, React.createElement(Header$ReasonReactExamples.make, {
+                  title: Strings$ReasonReactExamples.createConfig
+                }), React.createElement("textarea", {
+                  className: "font-mono w-5/6 h-32 p-2",
+                  placeholder: "SOURCE_COLUMN;RESULT_COLUMN;SEARCH_PHRASE;SEARCH_PHRASE_2;SEARCH_PHRASE_3\n    SOURCE_COLUMN_2;RESULT_COLUMN;SEARCH_PHRASE;SEARCH_PHRASE2;...",
+                  value: config,
+                  onChange: (function (x) {
+                      var nextValue = x.target.value;
+                      return Curry._1(setConfig, (function (param) {
+                                    return nextValue;
+                                  }));
                     })
-                }), tmp, tmp$1);
+                }), tmp, React.createElement(FileImport$ReasonReactExamples.make, {
+                  title: Strings$ReasonReactExamples.importDatabase,
+                  currentImport: currentDatabase,
+                  onImportedFile: (function (file) {
+                      return Curry._1(dispatch, /* ImportedDatabase */[file]);
+                    })
+                }), tmp$1);
 }
 
 var make = ImportFlow;
 
 exports.reducer = reducer;
-exports.currentConfig = currentConfig;
 exports.make = make;
 /* react Not a pure module */

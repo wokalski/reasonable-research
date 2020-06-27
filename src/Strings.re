@@ -1,7 +1,7 @@
 module Error = {
   let pleaseSelectOneFile = {js|Proszę wybrać jeden plik|js};
 };
-let importConfig = {js|Importuj Konfigurację|js};
+let createConfig = {js|Utwórz Konfigurację|js};
 let importDatabase = {js|Importuj Bazę Danych|js};
 let researchTitle = {js|Research 🧪|js};
 let invalidConfigFormat = {js|Niepoprawny format konfiguracji|js};
@@ -22,3 +22,7 @@ let saveProgress = {js|Zapisz|js};
 let loadSaved = {js|Przywróć zapisaną sesję|js};
 let resultColumn = {js|Kolumna docelowa|js};
 let dropFile = {js|Upuść plik tutaj|js};
+let skip = {js|Pomiń|js};
+let currentValue = {js|Zapisana wartość|js};
+let none = {js|brak|js};
+let otherValuesInRow = {js|Pozostałe wartości w tym wierszu|js};

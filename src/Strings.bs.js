@@ -5,7 +5,7 @@ var $$Error = {
   pleaseSelectOneFile: "Proszę wybrać jeden plik"
 };
 
-var importConfig = "Importuj Konfigurację";
+var createConfig = "Utwórz Konfigurację";
 
 var importDatabase = "Importuj Bazę Danych";
 
@@ -47,8 +47,16 @@ var resultColumn = "Kolumna docelowa";
 
 var dropFile = "Upuść plik tutaj";
 
+var skip = "Pomiń";
+
+var currentValue = "Zapisana wartość";
+
+var none = "brak";
+
+var otherValuesInRow = "Pozostałe wartości w tym wierszu";
+
 exports.$$Error = $$Error;
-exports.importConfig = importConfig;
+exports.createConfig = createConfig;
 exports.importDatabase = importDatabase;
 exports.researchTitle = researchTitle;
 exports.invalidConfigFormat = invalidConfigFormat;
@@ -69,4 +77,8 @@ exports.saveProgress = saveProgress;
 exports.loadSaved = loadSaved;
 exports.resultColumn = resultColumn;
 exports.dropFile = dropFile;
+exports.skip = skip;
+exports.currentValue = currentValue;
+exports.none = none;
+exports.otherValuesInRow = otherValuesInRow;
 /* No side effect */

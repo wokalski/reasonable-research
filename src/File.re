@@ -6,4 +6,4 @@ type t;
 
 [@bs.get] external size: t => float = "size";
 
-[@bs.get] external preview: t => string = "";
+[@bs.get] external preview: t => string = "preview";

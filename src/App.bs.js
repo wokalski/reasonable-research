@@ -136,13 +136,18 @@ function App(Props) {
                                   };
                           }), match$1.items),
                     onYes: (function (param) {
-                        return handleNewState(Curry._1(submit, true));
+                        return handleNewState(Curry._1(submit, /* Yes */0));
                       }),
                     onNo: (function (param) {
-                        return handleNewState(Curry._1(submit, false));
+                        return handleNewState(Curry._1(submit, /* No */1));
+                      }),
+                    onSkip: (function (param) {
+                        return handleNewState(Curry._1(submit, /* Idontknow */2));
                       }),
                     onBack: tmp$1,
-                    saveProgress: match$1.saveProgress
+                    saveProgress: match$1.saveProgress,
+                    currentValue: match$1.currentValue,
+                    row: match$1.row
                   });
     case /* Result */2 :
         return React.createElement(ResearchResult$ReasonReactExamples.make, {

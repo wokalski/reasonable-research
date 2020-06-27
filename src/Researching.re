@@ -1,6 +1,6 @@
 module ControlButtons = {
   [@react.component]
-  let make = (~title, ~onYes, ~onNo, ~onBack) =>
+  let make = (~title, ~onYes, ~onSkip, ~onNo, ~onBack) =>
     <div className="flex justify-between">
       <span>
         {switch (onBack) {
@@ -15,11 +15,37 @@ module ControlButtons = {
           {React.string(Strings.resultColumn ++ ": " ++ title)}
         </div>
         <div className="w-6" />
+        <LinkButton title=Strings.skip onClick={_ => onSkip()} />
+        <div className="w-6" />
         <LinkButton title=Strings.no onClick={_ => onNo()} />
         <div className="w-6" />
         <LinkButton title=Strings.yes onClick={_ => onYes()} />
       </div>
     </div>;
+};
+
+module ValueTable = {
+  [@react.component]
+  let make = (~values) => {
+    <div className="p-t-2">
+      <div className="w-full border-solid border border-gray-300">
+        {Js.Array.map(
+           ((key, value)) => {
+             <div
+               key
+               className="flex align-center border-solid border-b border-gray-300">
+               <div className="bg-gray-100 p-1 w-64 overflow-hidden">
+                 <span className="bold"> {React.string(key)} </span>
+               </div>
+               <div className="w-3/6 p-1"> {React.string(value)} </div>
+             </div>
+           },
+           Js.Dict.entries(values),
+         )
+         |> React.array}
+      </div>
+    </div>;
+  };
 };
 
 type item = {
@@ -28,7 +54,18 @@ type item = {
 };
 
 [@react.component]
-let make = (~resultColumn, ~items, ~onYes, ~onNo, ~onBack, ~saveProgress) => {
+let make =
+    (
+      ~resultColumn,
+      ~items,
+      ~onYes,
+      ~onNo,
+      ~onSkip,
+      ~onBack,
+      ~saveProgress,
+      ~currentValue,
+      ~row,
+    ) => {
   <div className="flex flex-col">
     <div className="flex">
       <Header title=Strings.researchTitle />
@@ -54,6 +91,18 @@ let make = (~resultColumn, ~items, ~onYes, ~onNo, ~onBack, ~saveProgress) => {
         )
      |> Array.of_list
      |> React.array}
-    <ControlButtons title=resultColumn onYes onNo onBack />
+    <div className="flex justify-end">
+      <span>
+        {React.string(Strings.currentValue ++ ": ")}
+        {switch (currentValue) {
+         | None =>
+           <span className="italic"> {React.string(Strings.none)} </span>
+         | Some(x) => React.string(x)
+         }}
+      </span>
+    </div>
+    <ControlButtons title=resultColumn onSkip onYes onNo onBack />
+    <Header title=Strings.otherValuesInRow />
+    <ValueTable values=row />
   </div>;
 };

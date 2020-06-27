@@ -5,12 +5,19 @@ type searchItem = {
   getTextHTML: unit => React.element,
 };
 
+type submission =
+  | Yes
+  | No
+  | Idontknow;
+
 type search = {
   resultColumn: string,
   items: list(searchItem),
   saveProgress: unit => unit,
-  submit: bool => t,
+  submit: submission => t,
   back: option(unit => t),
+  row: Js.Dict.t(string),
+  currentValue: option(string),
 }
 and t = {
   currentSearch: option(search),
@@ -18,7 +25,7 @@ and t = {
 };
 
 let make:
-  (~config: File.t, ~database: File.t) =>
+  (~config: string, ~database: File.t) =>
   Js.Promise.t(Belt.Result.t(t, string));
 
 let load: unit => option(t);

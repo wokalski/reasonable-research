@@ -1,71 +1,59 @@
 type importResult = Belt.Result.t(File.t, string);
 
 type state =
-  | ImportingConfig(option(importResult))
-  | ImportingDatabase(importResult, option(importResult));
+  | ImportingDatabase(option(importResult));
 
 type action =
-  | ImportedConfig(importResult)
   | ImportedDatabase(importResult);
 
 let reducer = (state, action) => {
   switch (state, action) {
-  | (ImportingConfig(_), ImportedConfig(Ok(file))) =>
-    ImportingDatabase(Ok(file), None)
-  | (ImportingConfig(_), ImportedConfig(result)) =>
-    ImportingConfig(Some(result))
-  | (ImportingDatabase(_, database), ImportedConfig(result)) =>
-    ImportingDatabase(result, database)
-  | (ImportingDatabase(config, _), ImportedDatabase(database)) =>
-    ImportingDatabase(config, Some(database))
-  | _ => state
+  | (ImportingDatabase(_), ImportedDatabase(database)) =>
+    ImportingDatabase(Some(database))
   };
 };
 
-let currentConfig =
-  fun
-  | ImportingConfig(c) => c
-  | ImportingDatabase(c, _) => Some(c);
-
 [@react.component]
 let make = (~loadSaved, ~submit) => {
-  let (state, dispatch) = React.useReducer(reducer, ImportingConfig(None));
+  let (ImportingDatabase(currentDatabase), dispatch) =
+    React.useReducer(reducer, ImportingDatabase(None));
+  let (config, setConfig) = React.useState(() => "");
   <div>
-    <FileImport
-      title=Strings.importConfig
-      currentImport={currentConfig(state)}
-      onImportedFile={file => dispatch(ImportedConfig(file))}
+    <Header title=Strings.createConfig />
+    <textarea
+      placeholder={|SOURCE_COLUMN;RESULT_COLUMN;SEARCH_PHRASE;SEARCH_PHRASE_2;SEARCH_PHRASE_3
+    SOURCE_COLUMN_2;RESULT_COLUMN;SEARCH_PHRASE;SEARCH_PHRASE2;...|}
+      className="font-mono w-5/6 h-32 p-2"
+      value=config
+      onChange={x => {
+        let nextValue = ReactEvent.Form.target(x)##value;
+        setConfig(_ => nextValue);
+      }}
     />
-    {switch (loadSaved, currentConfig(state)) {
-     | (Some(load), None) =>
+    {switch (loadSaved, config) {
+     | (Some(load), "") =>
        <button
          className={RedButton.className ++ " mt-4"} onClick={_ => load()}>
          {React.string(Strings.loadSaved)}
        </button>
      | _ => React.null
      }}
-    {switch (state) {
-     | ImportingDatabase(config, currentDatabase) =>
-       <React.Fragment>
-         <FileImport
-           title=Strings.importDatabase
-           currentImport=currentDatabase
-           onImportedFile={file => dispatch(ImportedDatabase(file))}
-         />
-         {Belt.Result.(
-            switch (config, currentDatabase) {
-            | (Ok(config), Some(Ok(database))) =>
-              <div className="mt-6">
-                <LinkButton
-                  onClick={_ => submit(~config, ~database)}
-                  title=Strings.next
-                />
-              </div>
-            | _ => React.null
-            }
-          )}
-       </React.Fragment>
-     | _ => React.null
-     }}
+    <FileImport
+      title=Strings.importDatabase
+      currentImport=currentDatabase
+      onImportedFile={file => dispatch(ImportedDatabase(file))}
+    />
+    {Belt.Result.(
+       switch (config, currentDatabase) {
+       | (config, Some(Ok(database))) =>
+         <div className="mt-6">
+           <LinkButton
+             onClick={_ => submit(~config, ~database)}
+             title=Strings.next
+           />
+         </div>
+       | _ => React.null
+       }
+     )}
   </div>;
 };

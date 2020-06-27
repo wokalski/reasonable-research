@@ -260,10 +260,26 @@ function generate(config, previous, database, queryState) {
                         evt.returnValue = "WARNING, UNSAVED";
                         return /* () */0;
                       }));
-                row[resultColumn] = result ? "1" : "0";
+                var setResult = function (param) {
+                  row[resultColumn] = param;
+                  return /* () */0;
+                };
+                switch (result) {
+                  case /* Yes */0 :
+                      setResult("1");
+                      break;
+                  case /* No */1 :
+                      setResult("0");
+                      break;
+                  case /* Idontknow */2 :
+                      break;
+                  
+                }
                 return nextSearch($$this);
               }),
-            back: tmp
+            back: tmp,
+            row: row,
+            currentValue: Js_dict.get(row, resultColumn)
           },
           result: database
         });
@@ -330,20 +346,12 @@ function createSearchState($staropt$star, $staropt$star$1, config, database, par
 }
 
 function make(config, database) {
-  return Promise.all(/* tuple */[
-                Papa$ReasonReactExamples.parse(config),
-                Papa$ReasonReactExamples.parseWithHeader(database)
-              ]).then((function (param) {
-                var match = param[0];
-                if (match.tag) {
-                  return Promise.resolve(/* Error */Block.__(1, [Strings$ReasonReactExamples.couldntLoadConfig]));
+  return Papa$ReasonReactExamples.parseWithHeader(database).then((function (database) {
+                if (database.tag) {
+                  return Promise.resolve(/* Error */Block.__(1, [Strings$ReasonReactExamples.couldntLoadDatabase]));
                 } else {
-                  var match$1 = param[1];
-                  if (match$1.tag) {
-                    return Promise.resolve(/* Error */Block.__(1, [Strings$ReasonReactExamples.couldntLoadDatabase]));
-                  } else {
-                    return Promise.resolve(createSearchState(undefined, undefined, match[0], match$1[0], /* () */0));
-                  }
+                  var config$1 = Papa$ReasonReactExamples.$$String.parseWithoutHeader(config);
+                  return Promise.resolve(createSearchState(undefined, undefined, config$1, database[0], /* () */0));
                 }
               }));
 }

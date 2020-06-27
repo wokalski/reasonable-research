@@ -75,7 +75,15 @@ let make = () => {
         |> ignore
       }}
     />
-  | Researching({resultColumn, items, submit, back, saveProgress}) =>
+  | Researching({
+      resultColumn,
+      items,
+      submit,
+      back,
+      saveProgress,
+      currentValue,
+      row,
+    }) =>
     <Researching
       items={List.map(
         ({slug, getTextHTML}) =>
@@ -84,14 +92,17 @@ let make = () => {
       )}
       resultColumn
       saveProgress
-      onYes={() => handleNewState(submit(true))}
-      onNo={() => handleNewState(submit(false))}
+      onYes={() => handleNewState(submit(Yes))}
+      onNo={() => handleNewState(submit(No))}
+      onSkip={() => handleNewState(submit(Idontknow))}
       onBack={
         switch (back) {
         | Some(handler) => Some(() => handleNewState(handler()))
         | None => None
         }
       }
+      row
+      currentValue
     />
   | Result(researchResult) => <ResearchResult researchResult />
   };
