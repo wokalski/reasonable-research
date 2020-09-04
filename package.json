@@ -19,7 +19,7 @@
   "license": "MIT",
   "dependencies": {
     "file-saver": "^2.0.2",
-    "papaparse": "^5.1.0",
+    "papaparse": "^5.2.0",
     "postcss-loader": "^3.0.0",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
